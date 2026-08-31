@@ -1,5 +1,5 @@
 import React from "react";
-import { Phone, MessageCircle, Users, MapPin, Car, Home } from "lucide-react";
+import { Phone, MessageCircle, Users, MapPin, Bike, Car, Home } from "lucide-react";
 
 export default function ApartmentCard({item}) {
   const isTenant = item.type === "tenant";
@@ -75,18 +75,15 @@ export default function ApartmentCard({item}) {
           </div>
         )}
 
-        {vehicles.length > 0 && (
-          <div className="flex items-start gap-2 text-gray-700">
-            <Car size={16} className="text-yellow-600 mt-1" />
-            <div className="flex flex-wrap gap-1">
-              {vehicles.map((v, idx) => (
-                <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-xs font-medium">
-                  {v}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+        <div className="flex items-center gap-2 text-gray-700">
+          <Bike size={16} className="text-yellow-600" />
+          <span>{item.twoWheelNos ? item.twoWheelNos : "—"}</span>
+        </div>
+
+        <div className="flex items-center gap-2 text-gray-700">
+          <Car size={16} className="text-yellow-600" />
+          <span>{item.fourWheelNos ? item.fourWheelNos : "—"}</span>
+        </div>
       </div>
     </div>
   );
