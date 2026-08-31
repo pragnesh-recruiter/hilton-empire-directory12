@@ -55,6 +55,7 @@ function normalizeRow(cols) {
 export default function App() {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
+  const [filterType, setFilterType] = useState("બધા");
 
   useEffect(() => {
     if (!CSV_URL) {
@@ -82,16 +83,24 @@ export default function App() {
   }, []);
 
   const filtered = useMemo(() => {
+    let result = data;
+
+    // Filter by owner/tenant type
+    if (filterType !== "બધા") {
+      result = result.filter(d => d.type === filterType);
+    }
+
+    // Then apply search on top
     const q = query.trim().toLowerCase();
-    if (!q) return data;
-    return data.filter(d => {
+    if (!q) return result;
+    return result.filter(d => {
       return (d.flatNo && d.flatNo.toLowerCase().includes(q))
         || (d.ownerName && d.ownerName.toLowerCase().includes(q))
         || (d.tenantName && d.tenantName.toLowerCase().includes(q))
         || (d.vehicleNo && d.vehicleNo.toLowerCase().includes(q))
         || (d.nativePlace && d.nativePlace.toLowerCase().includes(q));
     });
-  }, [data, query]);
+  }, [data, query, filterType]);
 
   return (
     <div className="min-h-screen p-6">
@@ -107,6 +116,26 @@ export default function App() {
 
       <div className="my-6">
         <SearchBar value={query} onChange={setQuery} placeholder="Search by flat, name, vehicle or native place..." />
+      </div>
+
+      <div className="flex gap-3 mb-6 flex-wrap">
+        {["બધા", "માલિક", "ભાડુઆત"].map((type) => (
+          <button
+            key={type}
+            onClick={() => setFilterType(type)}
+            className={`px-6 py-2 rounded-lg font-semibold border transition-all ${
+              filterType === type
+                ? "bg-yellow-600 text-black border-yellow-600"
+                : "bg-transparent text-yellow-500 border-yellow-600/50 hover:bg-yellow-600/10"
+            }`}
+          >
+            {type}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-4 text-yellow-400 font-semibold">
+        કુલ પરિણામો: {filtered.length}
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
