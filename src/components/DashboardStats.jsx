@@ -5,7 +5,7 @@ export default function DashboardStats({data=[]}){
   const totalMembers = data.reduce((s, r) => s + (Number(r.members) || 0), 0);
   const totalOwners = data.filter(d => {
     const t = (d.type || "").toString().toLowerCase();
-    return t.includes("મલિક") || t.includes("owner") || (d.ownerName && !d.tenantName);
+    return t.includes("માલિક") || t.includes("owner") || (d.ownerName && !d.tenantName);
   }).length;
   const totalTenants = data.filter(d => {
     const t = (d.type || "").toString().toLowerCase();
@@ -25,7 +25,7 @@ export default function DashboardStats({data=[]}){
     <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-4">
       {card("Total Apartments", totalFlats)}
       {card("Total સભ્ય", totalMembers)}
-      {card("Total મલિક", totalOwners)}
+      {card("Total માલિક", totalOwners)}
       {card("Total ભાડુઆત", totalTenants)}
       {card("Total Two Wheeler", total2)}
       {card("Total Four Wheeler", total4)}
