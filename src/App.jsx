@@ -84,8 +84,8 @@ export default function App() {
       skipEmptyLines: true,
       complete: results => {
         const rows = results.data;
-        // Row 0 = building title, Row 1 = column headers -> skip both
-        const dataRows = rows.slice(2);
+        // Row 0 = column headers only (this sheet has no separate title row) -> skip just this one
+        const dataRows = rows.slice(1);
 
         const cleaned = dataRows
           .map(normalizeRow)
