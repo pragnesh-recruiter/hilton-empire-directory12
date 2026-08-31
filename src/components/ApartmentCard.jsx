@@ -1,41 +1,93 @@
 import React from "react";
-import { Phone, MessageCircle } from "lucide-react";
+import { Phone, MessageCircle, Users, MapPin, Car, Home } from "lucide-react";
 
 export default function ApartmentCard({item}) {
-  const isTenant = item.tenantName && item.tenantName.length > 0;
+  const isTenant = item.type === "tenant";
   const primaryName = isTenant ? item.tenantName : item.ownerName;
   const secondaryName = isTenant ? item.ownerName : "";
 
   const phone = (item.contact || "").toString();
   const digits = phone.replace(/[^0-9+]/g, "");
-  const whatsappHref = phone ? `https://wa.me/${digits.replace(/^\+/, "")}` : "#";
+  const whatsappHref = phone ? `https://wa.me/91${digits.replace(/^\+/, "")}` : "#";
   const telHref = phone ? `tel:${digits}` : "#";
 
+  const vehicles = (item.vehicleNo || "")
+    .split(",")
+    .map(v => v.trim())
+    .filter(v => v.length > 0);
+
   return (
-    <div className="card p-4 rounded">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="text-lg font-semibold">{item.flatNo}</div>
-          <div className="text-md">{primaryName || "—"}</div>
-          {secondaryName && <div className="text-sm opacity-80">માલિક: {secondaryName}</div>}
+    <div className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 p-5 border-l-4 border-yellow-600">
+      {/* Header: flat number + type badge */}
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2">
+          <Home className="text-yellow-600" size={24} />
+          <h3 className="text-2xl font-bold text-gray-800">{item.flatNo}</h3>
         </div>
-        <div className="text-right">
-          <div className="text-sm">સભ્ય: {item.members || 0}</div>
-          <div className="text-sm">🛵 {item.twoWheeler || 0} &nbsp; 🚗 {item.fourWheeler || 0}</div>
-        </div>
+        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
+          isTenant ? "bg-orange-100 text-orange-700" : "bg-yellow-100 text-yellow-800"
+        }`}>
+          {isTenant ? "ભાડુઆત" : "માલિક"}
+        </span>
       </div>
 
-      <div className="mt-3 flex gap-2">
-        <a href={telHref} className="flex items-center gap-2 px-3 py-2 rounded border hover:opacity-90">
-          <Phone size={16}/> Call
-        </a>
-        <a href={whatsappHref} target="_blank" rel="noreferrer" className="flex items-center gap-2 px-3 py-2 rounded border hover:opacity-90">
-          <MessageCircle size={16}/> WhatsApp
-        </a>
-        {item.vehicleNo && <div className="ml-auto text-sm">Vehicle: {item.vehicleNo}</div>}
+      {/* Names */}
+      <div className="mb-3">
+        <p className="text-lg font-semibold text-gray-800">{primaryName || "—"}</p>
+        {secondaryName && (
+          <p className="text-sm text-gray-600">માલિક: {secondaryName}</p>
+        )}
       </div>
 
-      <div className="mt-2 text-xs opacity-80">Native: {item.nativePlace || "—"}</div>
+      {/* Call / WhatsApp buttons */}
+      {phone && (
+        <div className="flex gap-2 mb-4">
+          <a
+            href={telHref}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+          >
+            <Phone size={18} />
+            <span className="font-semibold">કૉલ કરો</span>
+          </a>
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noreferrer"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+          >
+            <MessageCircle size={18} />
+            <span className="font-semibold">WhatsApp</span>
+          </a>
+        </div>
+      )}
+
+      {/* Details: members, native place, vehicles - each with icon */}
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center gap-2 text-gray-700">
+          <Users size={16} className="text-yellow-600" />
+          <span>સભ્યો: {item.members || 0}</span>
+        </div>
+
+        {item.nativePlace && (
+          <div className="flex items-center gap-2 text-gray-700">
+            <MapPin size={16} className="text-yellow-600" />
+            <span>{item.nativePlace}</span>
+          </div>
+        )}
+
+        {vehicles.length > 0 && (
+          <div className="flex items-start gap-2 text-gray-700">
+            <Car size={16} className="text-yellow-600 mt-1" />
+            <div className="flex flex-wrap gap-1">
+              {vehicles.map((v, idx) => (
+                <span key={idx} className="bg-gray-100 px-2 py-1 rounded text-xs font-medium">
+                  {v}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
