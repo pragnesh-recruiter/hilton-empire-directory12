@@ -17,15 +17,15 @@ export default function ApartmentCard({item}) {
     .filter(v => v.length > 0);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 p-5 border-l-4 border-yellow-600">
+    <div className="bg-black rounded-lg shadow-lg hover:shadow-2xl transition-all duration-300 p-5 border-l-4 border-yellow-600">
       {/* Header: flat number + type badge */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           <Home className="text-yellow-600" size={24} />
-          <h3 className="text-2xl font-bold text-gray-800">{item.flatNo}</h3>
+          <h3 className="text-2xl font-bold text-yellow-400">{item.flatNo}</h3>
         </div>
         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-          isTenant ? "bg-orange-100 text-orange-700" : "bg-yellow-100 text-yellow-800"
+          isTenant ? "bg-orange-900/40 text-orange-300" : "bg-yellow-900/40 text-yellow-300"
         }`}>
           {isTenant ? "ભાડુઆત" : "માલિક"}
         </span>
@@ -33,9 +33,9 @@ export default function ApartmentCard({item}) {
 
       {/* Names */}
       <div className="mb-3">
-        <p className="text-lg font-semibold text-gray-800">{primaryName || "—"}</p>
+        <p className="text-lg font-semibold text-yellow-400">{primaryName || "—"}</p>
         {secondaryName && (
-          <p className="text-sm text-gray-600">માલિક: {secondaryName}</p>
+          <p className="text-sm text-yellow-600/80">માલિક: {secondaryName}</p>
         )}
       </div>
 
@@ -63,24 +63,24 @@ export default function ApartmentCard({item}) {
 
       {/* Details: members, native place, vehicles - each with icon */}
       <div className="space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-gray-700">
+        <div className="flex items-center gap-2 text-yellow-400">
           <Users size={16} className="text-yellow-600" />
           <span>સભ્યો: {item.members || 0}</span>
         </div>
 
         {item.nativePlace && (
-          <div className="flex items-center gap-2 text-gray-700">
+          <div className="flex items-center gap-2 text-yellow-400">
             <MapPin size={16} className="text-yellow-600" />
             <span>{item.nativePlace}</span>
           </div>
         )}
 
-        <div className="flex items-center gap-2 text-gray-700">
+        <div className="flex items-center gap-2 text-yellow-400">
           <Bike size={16} className="text-yellow-600" />
           <span>{item.twoWheelNos ? item.twoWheelNos : "—"}</span>
         </div>
 
-        <div className="flex items-center gap-2 text-gray-700">
+        <div className="flex items-center gap-2 text-yellow-400">
           <Car size={16} className="text-yellow-600" />
           <span>{item.fourWheelNos ? item.fourWheelNos : "—"}</span>
         </div>
