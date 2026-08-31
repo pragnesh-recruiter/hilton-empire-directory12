@@ -7,41 +7,79 @@ import EmergencyContacts from "./components/EmergencyContacts";
 
 const CSV_URL = import.meta.env.VITE_CSV_URL || "";
 
-export default function App(){
+// Pulls the first valid 10-digit Indian mobile number out of a messy cell
+// (handles cases like "9824804174 7802908006" or numbers split across lines)
+function extractFirstPhone(raw) {
+  if (!raw) return "";
+  const match = raw.toString().match(/\d{10}/);
+  return match ? match[0] : raw.toString().trim();
+}
+
+// Columns in the sheet, by position (0-indexed):
+// 0 FlatNo | 1 OwnerName | 2 OwnerPhone | 3 Type | 4 TenantName | 5 TenantPhone
+// 6 Members | 7 NativePlace | 8 TwoWheelerCount | 9 FourWheelerCount
+// 10 TwoWheelNo1 | 11 TwoWheelNo2 | 12 TwoWheelNo3 | 13 FourWheelNo1 | 14 FourWheelNo2
+function normalizeRow(cols) {
+  const flatNo = (cols[0] || "").toString().trim();
+  const ownerName = (cols[1] || "").toString().trim();
+  const ownerPhone = extractFirstPhone(cols[2]);
+  const type = (cols[3] || "").toString().trim();
+  const tenantName = (cols[4] || "").toString().trim();
+  const tenantPhone = extractFirstPhone(cols[5]);
+  const members = Number(cols[6]) || 0;
+  const nativePlace = (cols[7] || "").toString().trim();
+  const twoWheeler = Number(cols[8]) || 0;
+  const fourWheeler = Number(cols[9]) || 0;
+
+  const vehicles = [cols[10], cols[11], cols[12], cols[13], cols[14]]
+    .map(v => (v || "").toString().trim())
+    .filter(v => v.length > 0);
+
+  const isTenant = type.includes("ભાડુઆત") || tenantName.length > 0;
+  const contact = isTenant && tenantPhone ? tenantPhone : ownerPhone;
+
+  return {
+    flatNo,
+    ownerName,
+    tenantName,
+    type: isTenant ? "ભાડુઆત" : "માલિક",
+    contact,
+    members,
+    twoWheeler,
+    fourWheeler,
+    vehicleNo: vehicles.join(", "),
+    nativePlace,
+  };
+}
+
+export default function App() {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
 
-  useEffect(()=>{
+  useEffect(() => {
     if (!CSV_URL) {
       console.warn("VITE_CSV_URL not set");
       return;
     }
     Papa.parse(CSV_URL, {
       download: true,
-      header: true,
+      header: false,
       skipEmptyLines: true,
       complete: results => {
-        setData(results.data.map(row => normalizeRow(row)));
+        const rows = results.data;
+        // Row 0 = building title, Row 1 = column headers -> skip both
+        const dataRows = rows.slice(2);
+
+        const cleaned = dataRows
+          .map(normalizeRow)
+          // drop empty rows and the totals row at the bottom
+          .filter(r => r.flatNo && r.flatNo.startsWith("B-"));
+
+        setData(cleaned);
       },
       error: err => console.error("CSV parse error", err)
     });
   }, []);
-
-  const normalizeRow = (r) => {
-    return {
-      flatNo: (r["Flat No"] || r["Flat"] || r.flatNo || r.flat || r["FlatNo"] || "").toString().trim(),
-      type: (r["Type"] || r.type || "").toString().trim(),
-      ownerName: (r["Owner Name"] || r["મલિક"] || r.owner || r.ownerName || "").toString().trim(),
-      tenantName: (r["Tenant Name"] || r["ભાડુઆત"] || r.tenant || r.tenantName || "").toString().trim(),
-      contact: (r["Contact"] || r["Phone"] || r.contact || r.phone || "").toString().trim(),
-      members: Number(r["Members"] || r["Total Members"] || r.members || r["Total મેમ્બર"] || 0) || 0,
-      twoWheeler: Number(r["Two Wheeler"] || r.twowheeler || r["TwoWheeler"] || 0) || 0,
-      fourWheeler: Number(r["Four Wheeler"] || r.fourwheeler || r["FourWheeler"] || 0) || 0,
-      nativePlace: (r["Native Place"] || r.native || r["જનમ સ્થાન"] || "").toString().trim(),
-      vehicleNo: (r["Vehicle No"] || r.vehicle || r.Vehicle || "").toString().trim(),
-      raw: r
-    }
-  }
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -58,7 +96,7 @@ export default function App(){
   return (
     <div className="min-h-screen p-6">
       <header className="flex items-center gap-4 mb-6">
-        <img src="/logo.png" alt="logo" className="w-16 h-16 object-contain"/>
+        <img src="/logo.png" alt="logo" className="w-16 h-16 object-contain" />
         <div>
           <h1 className="text-2xl font-semibold">Hilton Empire Directory</h1>
           <p className="text-sm text-gray-300">Hilton Empire B Wing — Residency Directory</p>
@@ -72,7 +110,7 @@ export default function App(){
       </div>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map(item => <ApartmentCard key={item.flatNo + (item.contact || Math.random())} item={item} />)}
+        {filtered.map(item => <ApartmentCard key={item.flatNo} item={item} />)}
       </div>
 
       <div className="mt-8">
