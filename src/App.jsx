@@ -35,6 +35,14 @@ function normalizeRow(cols) {
     .map(v => (v || "").toString().trim())
     .filter(v => v.length > 0);
 
+  const twoWheelNos = [cols[10], cols[11], cols[12]]
+    .map(v => (v || "").toString().trim())
+    .filter(v => v.length > 0);
+
+  const fourWheelNos = [cols[13], cols[14]]
+    .map(v => (v || "").toString().trim())
+    .filter(v => v.length > 0);
+
   const isTenant = type.includes("ભાડુઆત") || tenantName.length > 0;
   const contact = isTenant && tenantPhone ? tenantPhone : ownerPhone;
 
@@ -42,12 +50,14 @@ function normalizeRow(cols) {
     flatNo,
     ownerName,
     tenantName,
-    type: isTenant ? "ભાડુઆત" : "માલિક",
+    type: isTenant ? "tenant" : "owner", // internal value only - safe English, no encoding issues
     contact,
     members,
     twoWheeler,
     fourWheeler,
     vehicleNo: vehicles.join(", "),
+    twoWheelNos: twoWheelNos.join(", "),
+    fourWheelNos: fourWheelNos.join(", "),
     nativePlace,
   };
 }
@@ -55,7 +65,13 @@ function normalizeRow(cols) {
 export default function App() {
   const [data, setData] = useState([]);
   const [query, setQuery] = useState("");
-  const [filterType, setFilterType] = useState("બધા");
+  const [filterType, setFilterType] = useState("all");
+
+  const filterOptions = [
+    { label: "બધા", value: "all" },
+    { label: "માલિક", value: "owner" },
+    { label: "ભાડુઆત", value: "tenant" },
+  ];
 
   useEffect(() => {
     if (!CSV_URL) {
@@ -86,7 +102,7 @@ export default function App() {
     let result = data;
 
     // Filter by owner/tenant type
-    if (filterType !== "બધા") {
+    if (filterType !== "all") {
       result = result.filter(d => d.type === filterType);
     }
 
@@ -119,17 +135,17 @@ export default function App() {
       </div>
 
       <div className="flex gap-3 mb-6 flex-wrap">
-        {["બધા", "માલિક", "ભાડુઆત"].map((type) => (
+        {filterOptions.map((opt) => (
           <button
-            key={type}
-            onClick={() => setFilterType(type)}
+            key={opt.value}
+            onClick={() => setFilterType(opt.value)}
             className={`px-6 py-2 rounded-lg font-semibold border transition-all ${
-              filterType === type
+              filterType === opt.value
                 ? "bg-yellow-600 text-black border-yellow-600"
                 : "bg-transparent text-yellow-500 border-yellow-600/50 hover:bg-yellow-600/10"
             }`}
           >
-            {type}
+            {opt.label}
           </button>
         ))}
       </div>
